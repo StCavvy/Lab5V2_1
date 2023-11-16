@@ -4,13 +4,11 @@ using namespace std;
 
 int main()
 {
-	//наш масив символів
-	char input[20]{'g', 'a', 'y', ' ', 'g', 'a', 'y', ' ', 's', 'e', 'x', ' ', 'p', 'o', 'r', 'n', ' ', 'n' ,'o','.'};
-
 	//змінні для підрахунку загальної кількості слів та змінна-флаг для перевірки умови
 	int deviders = 0;
 	int words = 0;
 	bool check = false;
+	int filled_size = 0;
 
 	//змінні для пошуку слів в масиві та підрахунку співвідношення
 	float percentage = 0;
@@ -20,22 +18,31 @@ int main()
 	int word_size = 0;
 	int encounters = 0;
 
-	/*for (int i = 0; i < 20; i++)
+	//наш массив
+	char input [300];
+
+	//приймаємо массив з консолі
+	cout << "Enter your array : ";
+	cin.getline(input, sizeof(input));
+	cout << endl;
+
+	//перевіряємо, скільки усього єлементів мають якесь значення, аби дізнатися яка частина масиву заповнена
+	for (int i = 0; i < sizeof(input); i++)
 	{
-		cout << "Enter " << i+1 << " symbol of 20 : ";
-		cin >> input[i];
-		cout << endl;
+		if (input[i] == NULL)
+		{
+			filled_size = i;
+			break;
+		}
 	}
-	system("clear");
-	*/
 
 	//виводимо в консоль масив
 	cout << "In array '";
-	for (int i = 0; i < 20; i++) cout << input[i];
+	for (int i = 0; i < filled_size; i++) cout << input[i];
 	cout << "' : " << endl;
 
 	//рахуємо та виводимо загальну кількість слів
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < filled_size; i++)
 	{
 		if (input[i] == ' ') deviders++;
 	}
@@ -45,20 +52,26 @@ int main()
 	//головний цикл, який відпрацьовує допоки умова для зупинки не здійснилася
 	while (check == false)
 	{
+
 		//шукаємо першу літеру в масиві, з неї починається слово
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < filled_size; i++)
 		{
 			if (input[i] >= 'A' && input[i] <= 'Z' || input[i] >= 'a' && input[i] <= 'z')
 			{
 				first_letter = i;
 				break;
 			}
+			else if (input[i] == NULL)
+			{
+				check = true;
+				break;
+			}
 		}
 
 		//шукаємо пробіл, символ перед ним буде останьою літерою слова, тепер ми знаємо де в масиві це слово
-		for (int i = first_letter; i < 20; i++)
+		for (int i = first_letter; i < filled_size + 1; i++)
 		{
-			if (input[i] == ' ' || input[i] == '.')
+			if (input[i] == ' ' || input[i] == NULL)
 			{
 				last_letter = i - 1;
 				break;
@@ -76,7 +89,7 @@ int main()
 		word_size = (last_letter - first_letter) + 1;
 
 		//шукаємо повтори слова у цьому циклі
-		for (int i = last_letter + 2; i < 20; i++)
+		for (int i = last_letter + 2; i < filled_size; i++)
 		{
 			//почитаючи з певного місця, перевіряємо, чи відворюється послідовність символів, яка відповідає нашому слову
 			for (int j = 0; j < word_size; j++)
@@ -86,16 +99,32 @@ int main()
 					//якщо літери співпали, то додаємо до лічильника один пункт
 					row++;
 				}
-				else break;
+				else
+				{
+					row = 0;
+					break;
+				}
 			}
 
-			//якщо кіл-ть літер підряд які співпали відповідає розміру слова, то рахуємо це за повтор слова, після чого його викреслюємо
-			if (row == word_size)
+			//якщо кіл-ть літер підряд які співпали відповідає розміру слова, 
+			// та це э окремим словом, перед та після якого пробіл або пустий єлемент
+			// то рахуємо це за повтор слова, після чого його викреслюємо його
+			if (row == word_size && input[i - 1] == ' ' && input[i + word_size] == ' ')
 			{
 				for (int j = 0; j < word_size; j++)
 				{
 					input[i + j] = '*';
-					if (i + word_size <= 20) input[i + word_size] = '*';
+					input[i + word_size] = '*';
+				}
+				encounters++;
+				row = 0;
+			}
+			else if (row == word_size && input[i - 1] == ' ' && input[i + word_size] == NULL)
+			{
+				for (int j = 0; j < word_size; j++)
+				{
+					input[i + j] = '*';
+					input[i + word_size] = '*';
 				}
 				encounters++;
 				row = 0;
@@ -111,7 +140,7 @@ int main()
 
 		//викреслюємо саме слово, аби при наступному проході не натикатися на нього, також викреслюємо пробіл
 		for (int i = first_letter; i <= last_letter; i++) input[i] = '*';
-		if (last_letter + 1 <= 20) input[last_letter + 1] = '*';
+		input[last_letter + 1] = '*';
 
 		//повертаємо нашим змінним початкові значення для наступного проходу
 		percentage = 0;
